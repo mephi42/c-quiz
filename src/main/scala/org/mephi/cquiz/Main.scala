@@ -10,43 +10,28 @@ import util.Random
 object Main extends App {
   args match {
     case Array(topic, variants, questions) =>
-      val nextQuestion = {
-        val rng = new Random
-        topic match {
-          case "loops" => () => new Loops(rng.nextLong())
-        }
-      }
-      val variantCount = variants.toInt
-      val questionCount = questions.toInt
+      val quiz = makeQuiz(topic, variants.toInt, questions.toInt)
 
       val q = new PrintStream("q")
       try {
         val a = new PrintStream("a")
         try {
-          for (variant <- 1 to variantCount) {
-            q.println("Вариант " + variant)
-            a.println("Вариант " + variant)
-            for (question <- 1 to questionCount) {
-              var done = false
-              while (!done) {
-                val currentQuestion = nextQuestion()
-                answer(currentQuestion) match {
-                  case Some(answer) => {
-                    q.println(question + ".")
-                    val qw = new DefaultWriter(q)
-                    currentQuestion.question(qw)
-                    qw.nextLine()
-                    if (question != questionCount) {
-                      qw.nextLine()
-                    }
+          for (variantNumber <- 1 to quiz.length) {
+            q.println("Вариант " + variantNumber)
+            a.println("Вариант " + variantNumber)
+            val variant = quiz(variantNumber - 1)
+            for (taskNumber <- 1 to variant.length) {
+              val task = variant(taskNumber - 1)
 
-                    a.println(question + ". " + answer)
-
-                    done = true
-                  }
-                  case None => {}
-                }
+              q.println(taskNumber + ".")
+              val qw = new DefaultWriter(q)
+              task.question.write(qw)
+              qw.nextLine()
+              if (taskNumber != variant.length) {
+                qw.nextLine()
               }
+
+              a.println(taskNumber + ". " + task.answer)
             }
             q.println("--------------------------------------------------------------------------------")
             a.println()
@@ -59,10 +44,44 @@ object Main extends App {
       }
   }
 
-  def program(quiz: Quiz, writer: Writer) {
+  case class Task(question: Question, answer: String)
+
+  def makeTask(question: Question) = answer(question).map(Task(question, _))
+
+  def forever(code: => Any): Nothing = {
+    while (true) {
+      code
+    }
+    sys.error("It is not possible to get here")
+  }
+
+  def makeTask(gen: () => Question): Task = {
+    forever {
+      makeTask(gen()) match {
+        case Some(task) => return task
+        case None => {}
+      }
+    }
+  }
+
+  def makeQuiz(topic: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
+    val nextQuestion = {
+      val rng = new Random
+      topic match {
+        case "loops" => () => new Loops(rng.nextLong())
+      }
+    }
+    (1 to variantCount).map(_ => {
+      (1 to questionCount).map(_ => {
+        makeTask(nextQuestion)
+      }).toArray
+    }).toArray
+  }
+
+  def program(question: Question, writer: Writer) {
     writer.write("#include <stdio.h>").nextLine()
     writer.write("int main() ").block {
-      quiz.question(writer)
+      question.write(writer)
       writer.write("return 0;").nextLine()
     }.nextLine().nextLine()
   }
@@ -74,7 +93,7 @@ object Main extends App {
     }
   }
 
-  def answer(quiz: Quiz): Option[String] = {
+  def answer(quiz: Question): Option[String] = {
     val dir = Files.createTempDirectory("c-quiz").toFile
 
     val src = new File(dir, "c-quiz.c")

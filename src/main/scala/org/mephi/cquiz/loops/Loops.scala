@@ -1,12 +1,12 @@
 package org.mephi.cquiz.loops
 
-import org.mephi.cquiz.{Writer, Quiz}
+import org.mephi.cquiz.{Writer, Question}
 import util.Random
 
-class Loops(val seed: Long) extends Quiz {
+class Loops(val seed: Long) extends Question {
   def this() = this(new Random().nextLong())
 
-  def question(writer: Writer) {
+  def write(writer: Writer) {
     rnd.setSeed(seed)
 
     writer.write("int i, j, x;").nextLine()
