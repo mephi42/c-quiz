@@ -2,13 +2,63 @@ package org.mephi.cquiz
 
 import java.nio.file.Files
 import java.io.{PrintStream, File}
+import loops.Loops
 import scala.sys.process._
 import io.Source
+import util.Random
 
-class Main extends App {
-}
+object Main extends App {
+  args match {
+    case Array(topic, variants, questions) =>
+      val nextQuestion = {
+        val rng = new Random
+        topic match {
+          case "loops" => () => new Loops(rng.nextLong())
+        }
+      }
+      val variantCount = variants.toInt
+      val questionCount = questions.toInt
 
-object Main {
+      val q = new PrintStream("q")
+      try {
+        val a = new PrintStream("a")
+        try {
+          for (variant <- 1 to variantCount) {
+            q.println("Вариант " + variant)
+            a.println("Вариант " + variant)
+            for (question <- 1 to questionCount) {
+              var done = false
+              while (!done) {
+                val currentQuestion = nextQuestion()
+                answer(currentQuestion) match {
+                  case Some(answer) => {
+                    q.println(question + ".")
+                    val qw = new DefaultWriter(q)
+                    currentQuestion.question(qw)
+                    qw.nextLine()
+                    if (question != questionCount) {
+                      qw.nextLine()
+                    }
+
+                    a.println(question + ". " + answer)
+
+                    done = true
+                  }
+                  case None => {}
+                }
+              }
+            }
+            q.println("--------------------------------------------------------------------------------")
+            a.println()
+          }
+        } finally {
+          a.close()
+        }
+      } finally {
+        q.close()
+      }
+  }
+
   def program(quiz: Quiz, writer: Writer) {
     writer.write("#include <stdio.h>").nextLine()
     writer.write("int main() ").block {

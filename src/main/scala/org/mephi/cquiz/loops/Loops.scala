@@ -3,8 +3,12 @@ package org.mephi.cquiz.loops
 import org.mephi.cquiz.{Writer, Quiz}
 import util.Random
 
-class Loops extends Quiz {
+class Loops(val seed: Long) extends Quiz {
+  def this() = this(new Random().nextLong())
+
   def question(writer: Writer) {
+    rnd.setSeed(seed)
+
     writer.write("int i, j, x;").nextLine()
     writer.write("x = ").write(rnd.nextInt(10)).write(";").nextLine()
     val nested = rnd.nextBoolean()
