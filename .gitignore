@@ -1,3 +1,4 @@
 .idea
-c-quiz.iml
+.idea_modules
+project/target
 target
