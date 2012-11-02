@@ -62,11 +62,11 @@ object Main extends App {
     }
   }
 
-  def makeQuiz(topic: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
-    val nextQuestion = Topics(topic)
+  def makeQuiz(topicId: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
+    val topic = Topics(topicId)
     (1 to variantCount).map(_ => {
       (1 to questionCount).map(_ => {
-        makeTask(nextQuestion)
+        makeTask(() => topic.nextQuestion())
       }).toArray
     }).toArray
   }

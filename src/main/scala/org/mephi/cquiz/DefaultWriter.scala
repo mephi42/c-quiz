@@ -1,6 +1,5 @@
 package org.mephi.cquiz
 
-
 class DefaultWriter(val app: Appendable) extends Writer {
   override def write(o: Any): Writer = {
     if (nextLinePending) {

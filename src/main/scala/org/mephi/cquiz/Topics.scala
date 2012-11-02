@@ -1,13 +1,8 @@
 package org.mephi.cquiz
 
-import loops.Loops
-import util.Random
-
 object Topics {
-  private val rng = new Random
-  private val map = Map[String, () => Question](
-    ("loops", () => new Loops(rng.nextLong()))
-  )
+  private val topics = Seq(Loops)
+  private val topicMap = topics.map(t => (t.id, t)).toMap
 
-  def apply(s: String) = map.getOrElse(s, sys.error("No such topic"))
+  def apply(topicName: String): Topic = topicMap.getOrElse(topicName, sys.error("No such topic"))
 }
