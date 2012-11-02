@@ -2,10 +2,8 @@ package org.mephi.cquiz
 
 import java.nio.file.Files
 import java.io.{PrintStream, File}
-import loops.Loops
 import scala.sys.process._
 import io.Source
-import util.Random
 
 object Main extends App {
   args match {
@@ -65,12 +63,7 @@ object Main extends App {
   }
 
   def makeQuiz(topic: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
-    val nextQuestion = {
-      val rng = new Random
-      topic match {
-        case "loops" => () => new Loops(rng.nextLong())
-      }
-    }
+    val nextQuestion = Topics(topic)
     (1 to variantCount).map(_ => {
       (1 to questionCount).map(_ => {
         makeTask(nextQuestion)
