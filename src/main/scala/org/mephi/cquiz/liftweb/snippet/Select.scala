@@ -3,9 +3,8 @@ package org.mephi.cquiz.liftweb.snippet
 import net.liftweb.http.{Templates, SHtml}
 import net.liftweb.util.Helpers._
 import xml.NodeSeq
-import org.mephi.cquiz.Topics
+import org.mephi.cquiz.{Topic, Topics}
 import collection.mutable
-import net.liftweb.common.Full
 import net.liftweb.util.ClearNodes
 import net.liftweb.http.js.JsCmds.SetHtml
 
@@ -15,11 +14,25 @@ class Select {
     val topicCounts = new mutable.HashMap[String, Int]
 
     def onSubmit = {
-      val template = Templates(List("quiz")) match {
-        case Full(x) => x
-        case _ => sys.error( """template "quiz" not found""")
-      }
-      SetHtml("#quiz", template)
+      val template = Templates(List("quiz")).getOrElse(sys.error( """template "quiz" not found"""))
+      val taskTopics = Topics.topics.flatMap(topic => {
+        topicCounts.get(topic.id).toList.flatMap(topicCount => {
+          List.fill(topicCount)(topic)
+        })
+      })
+      val xhtml = (1 to variantCount.toInt).flatMap(variantNumber => {
+        val variantNumberTransform = "span id=variantNumber *" #> variantNumber.toString
+        val taskTransform = "div id=task *" #> {
+          (taskDiv: NodeSeq) =>
+            taskTopics.zipWithIndex.map {
+              case ((taskTopic: Topic, taskIndex: Int)) =>
+                val taskNumberTransform = "span id=taskNumber" #> (taskIndex + 1).toString
+                taskNumberTransform(taskDiv)
+            }
+        }
+        (variantNumberTransform `compose` taskTransform)(template)
+      }).flatten
+      SetHtml("#quiz", xhtml)
     }
 
     val variantCountTransform = "td id=variantCount *" #> SHtml.text(variantCount, variantCount = _, "size" -> "3")
