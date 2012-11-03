@@ -3,10 +3,11 @@ package org.mephi.cquiz.liftweb.snippet
 import net.liftweb.http.{Templates, SHtml}
 import net.liftweb.util.Helpers._
 import xml.NodeSeq
-import org.mephi.cquiz.{Topic, Topics}
+import org.mephi.cquiz.{DefaultWriter, Main, Topic, Topics}
 import collection.mutable
 import net.liftweb.util.ClearNodes
 import net.liftweb.http.js.JsCmds.SetHtml
+import java.io.StringWriter
 
 class Select {
   def render = {
@@ -27,7 +28,13 @@ class Select {
             taskTopics.zipWithIndex.map {
               case ((taskTopic: Topic, taskIndex: Int)) =>
                 val taskNumberTransform = "span id=taskNumber" #> (taskIndex + 1).toString
-                taskNumberTransform(taskDiv)
+                val taskTransform = "pre id=code *" #> {
+                  val task = Main.makeTask(taskTopic)
+                  val writer = new StringWriter
+                  task.question.write(new DefaultWriter(writer))
+                  writer.toString
+                }
+                (taskNumberTransform `compose` taskTransform)(taskDiv)
             }
         }
         (variantNumberTransform `compose` taskTransform)(template)
