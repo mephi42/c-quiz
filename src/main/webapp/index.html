@@ -6,7 +6,7 @@
 </head>
 <body class="lift:content_id=main">
 <div id="main" class="lift:surround?with=default;at=content">
-    <lift:Select form="POST">
+    <form class="lift:Select" method="post">
         <h1>Случайные тесты</h1>
         <table>
             <tr>
@@ -28,10 +28,10 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="2" id="submit">xxx</td>
+                <td colspan="2"><input type="submit" value="Получить тест"/></td>
             </tr>
         </table>
-    </lift:Select>
+    </form>
 </div>
 </body>
 </html>

@@ -11,10 +11,6 @@ class Select {
     var variantCount = "1"
     val topicCounts = new mutable.HashMap[String, Int]
 
-    def onSubmit() {
-      sys.error("not implemented")
-    }
-
     val variantCountTransform = "td id=variantCount *" #> SHtml.text(variantCount, variantCount = _, "size" -> "3")
     val topicCountsTransform = "tr id=topics" #> {
       (tr: NodeSeq) => {
@@ -25,8 +21,7 @@ class Select {
         })
       }
     }
-    val submitTransform = "td id=submit *" #> SHtml.submit("Получить тест", onSubmit)
 
-    variantCountTransform `compose` topicCountsTransform `compose` submitTransform
+    variantCountTransform `compose` topicCountsTransform
   }
 }
