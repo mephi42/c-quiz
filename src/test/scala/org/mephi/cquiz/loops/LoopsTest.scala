@@ -6,6 +6,6 @@ import org.mephi.cquiz.{Loops, Main}
 class LoopsTest {
   @Test
   def test() {
-    println("answer: " + Main.answer(Loops.nextQuestion))
+    println("answer: " + Main.answer(Loops.nextQuestion()))
   }
 }

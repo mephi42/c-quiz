@@ -104,9 +104,9 @@ object Main extends App {
     val out = new File(dir, "c-quiz.out")
     val pyStream = new PrintStream(pyScript)
     try {
+      pyStream.println("gdb.execute(\"set args > " + out + "\")")
       pyStream.print(
-        s"""
-          |gdb.execute("set args > $out")
+        """
           |gdb.execute("set backtrace past-main")
           |
           |mainBp = gdb.Breakpoint("main")
