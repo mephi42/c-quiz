@@ -15,7 +15,7 @@ class Select {
     val topicCounts = new mutable.HashMap[String, Int]
 
     def onSubmit = {
-      val template = Templates(List("quiz")).getOrElse(sys.error( """template "quiz" not found"""))
+      val template = Templates(List("templates-hidden", "quiz")).getOrElse(sys.error( """template "quiz" not found"""))
       val taskTopics = Topics.topics.flatMap(topic => {
         topicCounts.get(topic.id).toList.flatMap(topicCount => {
           List.fill(topicCount)(topic)
@@ -39,7 +39,7 @@ class Select {
         }
         (variantNumberTransform `compose` taskTransform)(template)
       }).flatten
-      SetHtml("#quiz", xhtml)
+      SetHtml("quiz", xhtml)
     }
 
     val variantCountTransform = "td id=variantCount *" #> SHtml.text(variantCount, variantCount = _, "size" -> "3")
