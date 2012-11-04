@@ -46,9 +46,10 @@ class Select {
     val topicCountsTransform = "tr id=topics" #> {
       (tr: NodeSeq) => {
         Topics.topics.map(topic => {
-          val titleTransform = "td id=title *" #> topic.title
+          val titleTransform = "span id=title *" #> topic.title
+          val descriptionTransform = "span id=description *" #> topic.description
           val countTransform = "td id=count *" #> SHtml.text("1", v => topicCounts.put(topic.id, v.toInt), "size" -> "3")
-          (titleTransform `compose` countTransform)(tr)
+          (titleTransform `compose` descriptionTransform `compose` countTransform)(tr)
         })
       }
     }
