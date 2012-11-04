@@ -1,9 +1,8 @@
 package org.mephi.cquiz
 
-import scala.sys.process._
 
 import util.Random
-import java.io.ByteArrayInputStream
+import collection.mutable
 
 object Expressions extends Topic {
   override val id = "eval-cond"
@@ -14,70 +13,69 @@ object Expressions extends Topic {
 
   override def nextQuestion() = new Question {
     def write(writer: Writer) {
-      for (line <- (Process(Seq("perl", "--", "-", seed.toString)) #< new ByteArrayInputStream(perlScript)).lines) {
-        writer.write(line).nextLine()
+      val gen = new Gen(seed)
+      if (!gen.vars.isEmpty) {
+        writer.write("int ").write(gen.vars.mkString(", ")).write(";").nextLine()
       }
+      writer.write( """printf("%i\n", """).write(gen.expr).write(");").nextLine()
     }
 
-    private val seed = new Random().nextInt()
+    private val seed = new Random().nextLong()
   }
 
-  private val perlScript =
-    """
-      |#!/usr/bin/perl -w
-      |use strict;
-      |use warnings;
-      |use autodie qw( :all );
-      |
-      |my $seed = shift;
-      |if ( defined $seed ) { srand( $seed ); }
-      |
-      |my %vars = ();
-      |my $depth = 2;
-      |sub expr {
-      |  my @choices = do { if ( $depth == 0 ) {
-      |    ( \&val )
-      |  } else {
-      |    ( \&ternary, \&comma, \&assign, \&eq, \&neq, \&gt, \&lt, \&geq, \&leq, \&and, \&or )
-      |  } };
-      |  my $fun = $choices[ int( rand( scalar @choices ) ) ];
-      |  $depth--;
-      |  my $result = $fun->();
-      |  $depth++;
-      |  return $result;
-      |}
-      |
-      |sub var {
-      |  my $vars = 'abcdefghijklmnopqrstuvwxyz';
-      |  my $var = substr( $vars, int( rand( length( $vars ) ) ), 1 );
-      |  $vars{$var} = 1;
-      |  return $var;
-      |}
-      |
-      |sub val {
-      |  if ( rand( 3 ) < 1 ) {
-      |    return 0;
-      |  }
-      |  return int( rand( 20 ) );
-      |}
-      |sub ternary { return '(' . expr() . ' ? ' . expr() . ' : ' . expr() . ')'; }
-      |sub comma { return '(' . expr() . ', ' . expr() . ')'; }
-      |sub assign { return '(' . var() . ' = ' . expr() . ')'; }
-      |sub eq { return '(' . expr() . ' == ' . expr() . ')'; }
-      |sub neq { return '(' . expr() . ' != ' . expr() . ')'; }
-      |sub gt { return '(' . expr() . ' > ' . expr() . ')'; }
-      |sub lt { return '(' . expr() . ' < ' . expr() . ')'; }
-      |sub geq { return '(' . expr() . ' >= ' . expr() . ')'; }
-      |sub leq { return '(' . expr() . ' <= ' . expr() . ')'; }
-      |sub and { return '(' . expr() . ' && ' . expr() . ')'; }
-      |sub or { return '(' . expr() . ' || ' . expr() . ')'; }
-      |sub div { return '(' . expr() . ' / ' . expr() . ')'; }
-      |sub mod { return '(' . expr() . ' % ' . expr() . ')'; }
-      |
-      |my $expr = expr();
-      |if ( %vars ) {
-      |  print 'int ' . join( ', ', sort keys %vars ) . ";\n";
-      |}
-      |print 'printf( "%i\n", ' . $expr . ");\n";
-    """.stripMargin.getBytes
+  class Gen(seed: Long) {
+    private val rnd = new Random(seed)
+    private val choices0 = Seq(() => mkLiteral())
+    private val choicesN = Seq(() => mkTernary(), () => mkComma(), () => mkAssign(), () => mkEqual(), () => mkNotEqual(),
+      () => mkGreater(), () => mkLess(), () => mkGreaterOrEqual(), () => mkLessOrEqual(), () => mkLogicalAnd(), () => mkLogicalOr())
+    private val names = "abcdefghijklmnopqrstuvwxyz"
+    private var depth = 2
+    private val variables = new mutable.HashSet[String]
+    private val expression = mkExpr()
+
+    def vars = variables.toSeq
+
+    def expr = expression
+
+    def mkExpr(): String = {
+      val choices = if (depth == 0) choices0 else choicesN
+      val func = choices(rnd.nextInt(choices.size))
+      depth -= 1
+      val result = func()
+      depth += 1
+      result
+    }
+
+    private def variable() = {
+      val index = rnd.nextInt(names.length)
+      val name = names.substring(index, index + 1)
+      variables += name
+      name
+    }
+
+    private def mkLiteral() = if (rnd.nextInt(3) == 0) "0" else rnd.nextInt(20).toString
+
+    private def mkTernary() = "(" + mkExpr() + " ? " + mkExpr() + " : " + mkExpr() + ")"
+
+    private def mkComma() = "(" + mkExpr() + ", " + mkExpr() + ")"
+
+    private def mkAssign() = "(" + variable() + " = " + mkExpr() + ")"
+
+    private def mkEqual() = "(" + mkExpr() + " == " + mkExpr() + ")"
+
+    private def mkNotEqual() = "(" + mkExpr() + " != " + mkExpr() + ")"
+
+    private def mkGreater() = "(" + mkExpr() + " > " + mkExpr() + ")"
+
+    private def mkLess() = "(" + mkExpr() + " < " + mkExpr() + ")"
+
+    private def mkGreaterOrEqual() = "(" + mkExpr() + " >= " + mkExpr() + ")"
+
+    private def mkLessOrEqual() = "(" + mkExpr() + " <= " + mkExpr() + ")"
+
+    private def mkLogicalAnd() = "(" + mkExpr() + " && " + mkExpr() + ")"
+
+    private def mkLogicalOr() = "(" + mkExpr() + " || " + mkExpr() + ")"
+  }
+
 }
