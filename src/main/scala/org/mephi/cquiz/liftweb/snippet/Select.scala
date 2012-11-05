@@ -3,41 +3,49 @@ package org.mephi.cquiz.liftweb.snippet
 import net.liftweb.http.{Templates, SHtml}
 import net.liftweb.util.Helpers._
 import xml.NodeSeq
-import org.mephi.cquiz.{DefaultWriter, Main, Topic, Topics}
+import org.mephi.cquiz.{DefaultWriter, Main, Topics}
 import collection.mutable
 import net.liftweb.util.ClearNodes
 import net.liftweb.http.js.JsCmds.SetHtml
 import java.io.StringWriter
+import net.liftweb.common.Full
 
 class Select {
   def render = {
     var variantCount = "1"
     val topicCounts = new mutable.HashMap[String, Int]
+    var answers = "none"
 
     def onSubmit = {
       val template = Templates(List("templates-hidden", "quiz")).getOrElse(sys.error( """template "quiz" not found"""))
-      val taskTopics = Topics.topics.flatMap(topic => {
-        topicCounts.get(topic.id).toList.flatMap(topicCount => {
+      val taskTopics = Topics.topics.flatMap(topic =>
+        topicCounts.get(topic.id).toList.flatMap(topicCount =>
           List.fill(topicCount)(topic)
-        })
-      })
-      val xhtml = (1 to variantCount.toInt).flatMap(variantNumber => {
+        )).toArray
+      val variants = (1 to variantCount.toInt).map(variantNumber =>
+        taskTopics.map(topic => Main.makeTask(topic)).toArray).toArray
+      val xhtml = (1 to variants.length).flatMap(variantNumber => {
         val variantNumberTransform = "span id=variantNumber *" #> variantNumber.toString
-        val taskTransform = "div id=task *" #> {
+        val variant = variants(variantNumber - 1)
+        val tasksTransform = "div id=task *" #> {
           (taskDiv: NodeSeq) =>
-            taskTopics.zipWithIndex.map {
-              case ((taskTopic: Topic, taskIndex: Int)) =>
-                val taskNumberTransform = "span id=taskNumber" #> (taskIndex + 1).toString
-                val taskTransform = "pre id=code *" #> {
-                  val task = Main.makeTask(taskTopic)
-                  val writer = new StringWriter
-                  task.question.write(new DefaultWriter(writer))
-                  writer.toString
-                }
-                (taskNumberTransform `compose` taskTransform)(taskDiv)
-            }
+            (1 to variant.length).map(taskNumber => {
+              val numberTransform = "span id=taskNumber" #> taskNumber.toString
+              val task = variant(taskNumber - 1)
+              val questionTransform = "pre id=code *" #> {
+                val writer = new StringWriter
+                task.question.write(new DefaultWriter(writer))
+                writer.toString
+              }
+              val answerTransform = "div id=maybeAnswer" #> (if (answers == "each") {
+                "tt id=answer *" #> task.answer
+              } else {
+                ClearNodes
+              })
+              (numberTransform `compose` questionTransform `compose` answerTransform)(taskDiv)
+            })
         }
-        (variantNumberTransform `compose` taskTransform)(template)
+        (variantNumberTransform `compose` tasksTransform)(template)
       }).flatten
       SetHtml("quiz", xhtml)
     }
@@ -53,9 +61,10 @@ class Select {
         })
       }
     }
+    val answersTypeTransform = "td id=answersType" #> SHtml.select(Seq(("none", "Нет"), ("each", "После каждого задания")), Full(answers), answers = _)
     val submitTransform = "td id=submit" #> SHtml.ajaxSubmit("Получить тест", () => onSubmit)
     val quizTransform = "div id=quiz *" #> ClearNodes
 
-    variantCountTransform `compose` topicCountsTransform `compose` submitTransform `compose` quizTransform
+    variantCountTransform `compose` topicCountsTransform `compose` answersTypeTransform `compose` submitTransform `compose` quizTransform
   }
 }
