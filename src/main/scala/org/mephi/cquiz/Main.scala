@@ -62,7 +62,14 @@ object Main extends App {
     }
   }
 
-  def makeTask(topic: Topic): Task = makeTask(() => topic.nextQuestion())
+  def makeTask(topic: Topic): Task = PredefinedSeeds.seeds match {
+    case Some(s) => {
+      val tasks = s.getOrElse(topic.id, sys.error("No seeds for " + topic.id))
+      val (seed, answer) = tasks(Rng.nextInt(tasks.length))
+      Task(topic.question(seed), answer)
+    }
+    case None => makeTask(() => topic.nextQuestion())
+  }
 
   def makeQuiz(topicId: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
     val topic = Topics(topicId)
