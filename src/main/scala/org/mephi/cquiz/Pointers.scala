@@ -9,8 +9,8 @@ object Pointers extends Topic {
 
   override val description = "Тест на знание указателей"
 
-  override def question(seed: Long) = new Question {
-    def write(writer: Writer) {
+  override def question(_seed: Long) = new Question {
+    override def write(writer: Writer) {
       val rnd = new Random(seed)
       rnd.shuffle(Seq("a", "b", "c", "d", "e", "f")) match {
         case Seq(v0, v1, p0, p1, pp0, pp1) =>
@@ -25,5 +25,7 @@ object Pointers extends Topic {
           writer.write( """printf("%i\n", """).write(sum).write(");").nextLine()
       }
     }
+
+    override def seed = _seed
   }
 }

@@ -11,14 +11,16 @@ object Expressions extends Topic {
 
   override val description = "Тест на знание выражений"
 
-  override def question(seed: Long) = new Question {
-    def write(writer: Writer) {
+  override def question(_seed: Long) = new Question {
+    override def write(writer: Writer) {
       val gen = new Gen(seed)
       if (!gen.vars.isEmpty) {
         writer.write("int ").write(gen.vars.mkString(", ")).write(";").nextLine()
       }
       writer.write( """printf("%i\n", """).write(gen.expr).write(");").nextLine()
     }
+
+    override def seed = _seed
   }
 
   class Gen(seed: Long) {

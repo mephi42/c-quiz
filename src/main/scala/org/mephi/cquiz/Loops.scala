@@ -9,8 +9,8 @@ object Loops extends Topic {
 
   override val description = "Тест на знание циклов while, do-while и for"
 
-  override def question(seed: Long) = new Question {
-    def write(writer: Writer) {
+  override def question(_seed: Long) = new Question {
+    override def write(writer: Writer) {
       rnd.setSeed(seed)
 
       writer.write("int i, j, x;").nextLine()
@@ -32,6 +32,8 @@ object Loops extends Topic {
       }
       writer.write("printf(\"%i\\n\", x);").nextLine()
     }
+
+    override def seed = _seed
 
     private def loop(counter: String, writer: Writer)(body: => Any) {
       val start = rnd.nextInt(10)

@@ -12,6 +12,7 @@ seq(webSettings :_*)
 
 libraryDependencies ++= Seq(
   "net.liftweb" % "lift-webkit_2.9.2" % "2.5-M2",
+  "net.debasishg" % "sjson_2.9.1" % "0.17",
   "junit" % "junit" % "4.10" % "test",
   "org.eclipse.jetty" % "jetty-server" % "8.1.7.v20120910" % "container",
   "org.eclipse.jetty" % "jetty-webapp" % "8.1.7.v20120910" % "container",
