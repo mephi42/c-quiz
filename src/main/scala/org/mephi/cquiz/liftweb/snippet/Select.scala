@@ -17,16 +17,17 @@ class Select {
     var answers = "none"
 
     def onSubmit = {
-      val template = Templates(List("templates-hidden", "tasks")).getOrElse(sys.error( """template "tasks" not found"""))
       val taskTopics = Topics.topics.flatMap(topic =>
         topicCounts.get(topic.id).toList.flatMap(topicCount =>
           List.fill(topicCount)(topic)
         )).toArray
       val variants = (1 to variantCount.toInt).map(variantNumber =>
         taskTopics.map(topic => Main.makeTask(topic)).toArray).toArray
+
+      val tasksTemplate = Templates(List("templates-hidden", "tasks")).getOrElse(sys.error( """template "tasks" not found"""))
       val variantsTransform = "div id=variant *" #> {
         (1 to variants.length).map(variantNumber => {
-          val variantNumberTransform = "span id=variantNumber *" #> variantNumber.toString
+          val numberTransform = "span id=variantNumber *" #> variantNumber.toString
           val variant = variants(variantNumber - 1)
           val tasksTransform = "div id=task *" #> {
             (1 to variant.length).map(taskNumber => {
@@ -45,11 +46,34 @@ class Select {
               (numberTransform `compose` questionTransform `compose` answerTransform)
             })
           }
-          (variantNumberTransform `compose` tasksTransform)
+          (numberTransform `compose` tasksTransform)
         })
       }
-      val xhtml = variantsTransform(template)
-      SetHtml("maybeTasks", xhtml)
+      val tasksXhtml = variantsTransform(tasksTemplate)
+
+      val answersXhtml = if (answers == "all") {
+        val answersTemplate = Templates(List("templates-hidden", "answers")).getOrElse(sys.error( """template "answers" not found"""))
+        val variantsTransform = "div id=variant *" #> {
+          (1 to variants.length).map(variantNumber => {
+            val numberTransform = "span id=variantNumber *" #> variantNumber.toString
+            val variant = variants(variantNumber - 1)
+            val tasksTransform = "div id=task *" #> {
+              (1 to variant.length).map(taskNumber => {
+                val numberTransform = "span id=taskNumber" #> taskNumber.toString
+                val task = variant(taskNumber - 1)
+                val answerTransform = "tt id=answer *" #> task.answer
+                numberTransform `compose` answerTransform
+              })
+            }
+            numberTransform `compose` tasksTransform
+          })
+        }
+        Some(variantsTransform(answersTemplate))
+      } else {
+        None
+      }
+
+      SetHtml("maybeTasks", (tasksXhtml ++ answersXhtml).flatten)
     }
 
     val variantCountTransform = "td id=variantCount *" #> SHtml.text(variantCount, variantCount = _, "size" -> "3")
@@ -63,7 +87,7 @@ class Select {
         })
       }
     }
-    val answersTypeTransform = "td id=answersType" #> SHtml.select(Seq(("none", "Нет"), ("each", "После каждого задания")), Full(answers), answers = _)
+    val answersTypeTransform = "td id=answersType" #> SHtml.select(Seq(("none", "Нет"), ("each", "После каждого задания"), ("all", "Отдельно")), Full(answers), answers = _)
     val submitTransform = "td id=submit" #> SHtml.ajaxSubmit("Получить тест", () => onSubmit)
     val quizTransform = "div id=maybeTasks *" #> ClearNodes
 
