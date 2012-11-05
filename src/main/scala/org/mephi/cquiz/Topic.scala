@@ -1,5 +1,7 @@
 package org.mephi.cquiz
 
+import util.Random
+
 trait Topic {
   def id: String
 
@@ -7,5 +9,9 @@ trait Topic {
 
   def description: String
 
-  def nextQuestion(): Question
+  def question(seed: Long): Question
+
+  def nextQuestion() = question(TopicRng.nextLong())
 }
+
+object TopicRng extends Random

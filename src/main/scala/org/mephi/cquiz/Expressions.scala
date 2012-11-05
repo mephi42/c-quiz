@@ -11,7 +11,7 @@ object Expressions extends Topic {
 
   override val description = "Тест на знание выражений"
 
-  override def nextQuestion() = new Question {
+  override def question(seed: Long) = new Question {
     def write(writer: Writer) {
       val gen = new Gen(seed)
       if (!gen.vars.isEmpty) {
@@ -19,8 +19,6 @@ object Expressions extends Topic {
       }
       writer.write( """printf("%i\n", """).write(gen.expr).write(");").nextLine()
     }
-
-    private val seed = new Random().nextLong()
   }
 
   class Gen(seed: Long) {

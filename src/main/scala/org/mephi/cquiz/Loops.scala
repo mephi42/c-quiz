@@ -9,7 +9,7 @@ object Loops extends Topic {
 
   override val description = "Тест на знание циклов while, do-while и for"
 
-  override def nextQuestion() = new Question {
+  override def question(seed: Long) = new Question {
     def write(writer: Writer) {
       rnd.setSeed(seed)
 
@@ -84,7 +84,6 @@ object Loops extends Topic {
       }
     }
 
-    private val seed = new Random().nextLong()
     private val rnd = new Random
   }
 }
