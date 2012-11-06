@@ -5,9 +5,9 @@ import util.Random
 object Pointers extends Topic {
   override val id = "pointers"
 
-  override val title = "Указатели"
+  override val titleKey = "pointersTitle"
 
-  override val description = "Тест на знание указателей"
+  override val descriptionKey = "pointersDescription"
 
   override def question(_seed: Long) = new Question {
     override def write(writer: Writer) {

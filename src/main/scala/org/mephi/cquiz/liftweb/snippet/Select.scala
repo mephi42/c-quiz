@@ -1,9 +1,9 @@
 package org.mephi.cquiz.liftweb.snippet
 
-import net.liftweb.http.{Templates, SHtml}
+import net.liftweb.http.{S, Templates, SHtml}
 import net.liftweb.util.Helpers._
 import xml.NodeSeq
-import org.mephi.cquiz.{DefaultWriter, Main, Topics}
+import org.mephi.cquiz.{Topic, DefaultWriter, Main, Topics}
 import collection.mutable
 import net.liftweb.util.ClearNodes
 import net.liftweb.http.js.JsCmds.SetHtml
@@ -12,6 +12,8 @@ import net.liftweb.common.Full
 
 class Select {
   def render = {
+    val bundle = Topic.getBundle(S.locale)
+
     var variantCount = "1"
     val topicCounts = new mutable.HashMap[String, Int]
     var answers = "none"
@@ -80,15 +82,15 @@ class Select {
     val topicCountsTransform = "tr id=topics" #> {
       (tr: NodeSeq) => {
         Topics.topics.map(topic => {
-          val titleTransform = "span id=title *" #> topic.title
-          val descriptionTransform = "span id=description *" #> topic.description
+          val titleTransform = "span id=title *" #> bundle.getString(topic.titleKey)
+          val descriptionTransform = "span id=description *" #> bundle.getString(topic.descriptionKey)
           val countTransform = "td id=count *" #> SHtml.text("1", v => topicCounts.put(topic.id, v.toInt), "size" -> "3")
           (titleTransform `compose` descriptionTransform `compose` countTransform)(tr)
         })
       }
     }
-    val answersTypeTransform = "td id=answersType" #> SHtml.select(Seq(("none", "Нет"), ("each", "После каждого задания"), ("all", "Отдельно")), Full(answers), answers = _)
-    val submitTransform = "td id=submit" #> SHtml.ajaxSubmit("Получить тест", () => onSubmit)
+    val answersTypeTransform = "td id=answersType" #> SHtml.select(Seq(("none", S.?("noAnswers")), ("each", S.?("afterEach")), ("all", S.?("afterAll"))), Full(answers), answers = _)
+    val submitTransform = "td id=submit" #> SHtml.ajaxSubmit(S.?("getTest"), () => onSubmit)
     val quizTransform = "div id=maybeTasks *" #> ClearNodes
 
     variantCountTransform `compose` topicCountsTransform `compose` answersTypeTransform `compose` submitTransform `compose` quizTransform

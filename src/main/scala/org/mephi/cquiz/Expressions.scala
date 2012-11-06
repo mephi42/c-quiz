@@ -7,9 +7,9 @@ import collection.mutable
 object Expressions extends Topic {
   override val id = "eval-cond"
 
-  override val title = "Выражения"
+  override val titleKey = "expressionsTitle"
 
-  override val description = "Тест на знание выражений"
+  override val descriptionKey = "expressionsDescription"
 
   override def question(_seed: Long) = new Question {
     override def write(writer: Writer) {

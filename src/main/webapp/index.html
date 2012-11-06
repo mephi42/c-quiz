@@ -2,41 +2,40 @@
 <html>
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
-    <title>Тесты по Си</title>
 </head>
 <body class="lift:content_id=main">
 <div id="main" class="lift:surround?with=default;at=content">
     <div class="lift:Select">
         <form class="lift:form.ajax" method="post">
-            <h1>Случайные тесты</h1>
+            <h1><span class="lift:Loc.randomTests">randomTests</span></h1>
             <table>
                 <tr>
-                    <td>Количество вариантов:</td>
-                    <td id="variantCount">vvv</td>
+                    <td><span class="lift:Loc.variantCount">variantCount</span>:</td>
+                    <td id="variantCount">variantCount</td>
                 </tr>
                 <tr>
-                    <td>
+                    <td colspan="2">
                         <table>
                             <tr>
-                                <td><b>Тема</b></td>
-                                <td><b>Количество<br/> заданий</b></td>
+                                <td><b><span class="lift:Loc.topic">topic</span></b></td>
+                                <td><b><span class="lift:Loc.taskCount">taskCount</span></b></td>
                             </tr>
                             <tr id="topics">
                                 <td>
-                                    <span id="title">ttt</span><br/>
-                                    <small><span id="description">ddd</span></small>
+                                    <span id="title">title</span><br/>
+                                    <small><span id="description">description</span></small>
                                 </td>
-                                <td id="count">ccc</td>
+                                <td id="count">count</td>
                             </tr>
                         </table>
                     </td>
                 </tr>
                 <tr>
-                    <td>Ответы:</td>
-                    <td id="answersType">aaa</td>
+                    <td><span class="lift:Loc.answerTypes">answerTypes</span>:</td>
+                    <td id="answersType">answerType</td>
                 </tr>
                 <tr>
-                    <td id="submit" colspan="2">sss</td>
+                    <td id="submit" colspan="2">submit</td>
                 </tr>
             </table>
         </form>
@@ -44,7 +43,7 @@
         <div style="display:none" id="in-progress">
             <img src="/images/in-progress.gif" width="16" height="16"/>
         </div>
-        <div id="maybeTasks">ttt</div>
+        <div id="maybeTasks">tasks</div>
     </div>
 </div>
 </body>

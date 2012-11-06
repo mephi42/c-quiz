@@ -5,9 +5,9 @@ import util.Random
 object Loops extends Topic {
   override val id = "loops"
 
-  override val title = "Циклы"
+  override val titleKey = "loopsTitle"
 
-  override val description = "Тест на знание циклов while, do-while и for"
+  override val descriptionKey = "loopsDescription"
 
   override def question(_seed: Long) = new Question {
     override def write(writer: Writer) {
