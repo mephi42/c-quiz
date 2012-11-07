@@ -1,0 +1,7 @@
+c-quiz: C language quiz generator
+
+Generates random questions and answers for C language quiz.
+Questions are of the form: "what will this piece of code print?".
+Can generate variants with questions on different topics.
+
+Public deployment: http://c-quiz.mephi42.cloudbees.net/
