@@ -82,6 +82,9 @@ object Main extends App {
 
   def program(question: Question, writer: Writer) {
     writer.write("#include <stdio.h>").nextLine()
+    for (include <- question.includes) {
+      writer.write("#include ").write(include).nextLine()
+    }
     writer.write("int main() ").block {
       question.write(writer)
       writer.write("return 0;").nextLine()

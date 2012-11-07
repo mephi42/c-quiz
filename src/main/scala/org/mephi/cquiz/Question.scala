@@ -8,4 +8,6 @@ trait Question {
   def minSteps: Int = 0
 
   def maxSteps: Int = 100
+
+  def includes: Iterable[String] = None
 }
