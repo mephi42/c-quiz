@@ -35,6 +35,8 @@ object Loops extends Topic {
 
     override def seed = _seed
 
+    override val minSteps = 15
+
     private def loop(counter: String, writer: Writer)(body: => Any) {
       val start = rnd.nextInt(10)
       val end = rnd.nextInt(10)

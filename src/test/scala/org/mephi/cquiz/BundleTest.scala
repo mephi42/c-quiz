@@ -1,7 +1,6 @@
-package org.mephi.cquiz.loops
+package org.mephi.cquiz
 
 import org.junit.Test
-import org.mephi.cquiz.{Expressions, Topic}
 import java.util.Locale
 
 class BundleTest {

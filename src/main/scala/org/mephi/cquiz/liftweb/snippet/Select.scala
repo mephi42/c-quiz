@@ -23,8 +23,8 @@ class Select {
         topicCounts.get(topic.id).toList.flatMap(topicCount =>
           List.fill(topicCount)(topic)
         )).toArray
-      val variants = (1 to variantCount.toInt).map(variantNumber =>
-        taskTopics.map(topic => Main.makeTask(topic)).toArray).toArray
+      val variants = (1 to variantCount.toInt).par.map(variantNumber =>
+        taskTopics.par.map(topic => Main.makeTask(topic)).toArray).toArray
 
       val tasksTemplate = Templates(List("templates-hidden", "tasks")).getOrElse(sys.error( """template "tasks" not found"""))
       val variantsTransform = "div id=variant *" #> {

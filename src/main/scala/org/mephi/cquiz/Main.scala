@@ -73,8 +73,8 @@ object Main extends App {
 
   def makeQuiz(topicId: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
     val topic = Topics(topicId)
-    (1 to variantCount).map(_ => {
-      (1 to questionCount).map(_ => {
+    (1 to variantCount).par.map(_ => {
+      (1 to questionCount).par.map(_ => {
         makeTask(topic)
       }).toArray
     }).toArray
@@ -95,13 +95,13 @@ object Main extends App {
     }
   }
 
-  def answer(quiz: Question): Option[String] = {
+  def answer(question: Question): Option[String] = {
     val dir = Files.createTempDirectory("c-quiz").toFile
 
     val src = new File(dir, "c-quiz.c")
     val srcStream = new PrintStream(src)
     try {
-      program(quiz, new DefaultWriter(srcStream))
+      program(question, new DefaultWriter(srcStream))
     } finally {
       srcStream.close()
     }
@@ -113,9 +113,9 @@ object Main extends App {
     val out = new File(dir, "c-quiz.out")
     val pyStream = new PrintStream(pyScript)
     try {
-      pyStream.println("gdb.execute(\"set args > " + out + "\")")
       pyStream.print(
         """
+          |gdb.execute("set args > %s")
           |gdb.execute("set backtrace past-main")
           |
           |mainBp = gdb.Breakpoint("main")
@@ -128,16 +128,17 @@ object Main extends App {
           |    if mainBp in event.breakpoints:
           |      mainDoneBp = gdb.FinishBreakpoint()
           |    if mainDoneBp != None and mainDoneBp in event.breakpoints:
+          |      if count < %d:
+          |        gdb.execute("quit 1")
           |      gdb.execute("c")
           |  count = count + 1
-          |  if count > 100:
+          |  if count > %d:
           |    gdb.execute("quit 1")
           |  gdb.execute("next")
           |gdb.events.stop.connect(onStop)
           |
           |gdb.execute("run")
-        """.stripMargin
-      )
+        """.stripMargin.format(out, question.minSteps, question.maxSteps))
     } finally {
       pyStream.close()
     }
