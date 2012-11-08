@@ -4,6 +4,7 @@ import java.nio.file.Files
 import java.io.{PrintStream, File}
 import scala.sys.process._
 import io.Source
+import org.apache.commons.io.FileUtils
 
 object Main extends App {
   args match {
@@ -100,7 +101,14 @@ object Main extends App {
 
   def answer(question: Question): Option[String] = {
     val dir = Files.createTempDirectory("c-quiz").toFile
+    try {
+      answer(question, dir)
+    } finally {
+      FileUtils.deleteDirectory(dir)
+    }
+  }
 
+  private def answer(question: Question, dir: File): Option[String] = {
     val src = new File(dir, "c-quiz.c")
     val srcStream = new PrintStream(src)
     try {
