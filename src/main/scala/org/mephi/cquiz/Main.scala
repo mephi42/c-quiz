@@ -7,9 +7,9 @@ import io.Source
 import org.apache.commons.io.FileUtils
 
 object Main extends App {
-  args match {
-    case Array(topic, variants, questions) =>
-      val quiz = makeQuiz(topic, variants.toInt, questions.toInt)
+  args.toList match {
+    case variants :: topics =>
+      val quiz = makeQuiz(variants.toInt, topics)
 
       val q = new PrintStream("q")
       try {
@@ -72,10 +72,16 @@ object Main extends App {
     case None => makeTask(() => topic.nextQuestion())
   }
 
-  def makeQuiz(topicId: String, variantCount: Int, questionCount: Int): Array[Array[Task]] = {
-    val topic = Topics(topicId)
+  def makeQuiz(variantCount: Int, topicSpecs: Seq[String]): Array[Array[Task]] = {
+    val topics = topicSpecs.flatMap(topicSpec => {
+      topicSpec.split(":") match {
+        case Array(id, count) =>
+          val topic = Topics(id)
+          Array.fill(count.toInt)(topic)
+      }
+    })
     (1 to variantCount).par.map(_ => {
-      (1 to questionCount).par.map(_ => {
+      topics.par.map(topic => {
         makeTask(topic)
       }).toArray
     }).toArray
