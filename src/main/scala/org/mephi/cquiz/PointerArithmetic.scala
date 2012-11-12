@@ -11,6 +11,8 @@ object PointerArithmetic extends Topic {
 
   def question(_seed: Long) = new Question {
     override def write(writer: Writer) {
+      rng.setSeed(seed)
+
       val variables: Array[Char] = rng.shuffle(('a' to 'z').toSeq).toArray
 
       class Expr(val s: String, val weight: Int, val variables: Set[Char]) {
@@ -95,6 +97,6 @@ object PointerArithmetic extends Topic {
 
     override def includes = Seq("<stdint.h>")
 
-    private val rng = new Random(seed)
+    private val rng = new Random
   }
 }

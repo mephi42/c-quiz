@@ -5,7 +5,7 @@ import util.Random
 import collection.mutable
 
 object Expressions extends Topic {
-  override val id = "eval-cond"
+  override val id = "expressions"
 
   override val titleKey = "expressionsTitle"
 
