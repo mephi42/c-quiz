@@ -9,9 +9,9 @@ object PointerArithmetic extends Topic {
 
   override val descriptionKey = "pointerArithmeticDescription"
 
-  def question(_seed: Long) = new Question {
-    override def write(writer: Writer) {
-      rng.setSeed(seed)
+  def question(_seed: Long) = new SimpleCOutput {
+    protected override def write(code: Writer) {
+      rng.setSeed(_seed)
 
       val variables: Array[Char] = rng.shuffle(('a' to 'z').toSeq).toArray
 
@@ -87,15 +87,13 @@ object PointerArithmetic extends Topic {
       for (variable <- expr.variables) {
         val idx = variables.indexOf(variable)
         val tpe = "uint" + (8 << (idx / 8)) + "_t"
-        writer.write("%s *%c = (%s*)0x%x;".format(tpe, variable, tpe, rng.nextInt(16))).nextLine()
+        code.write("%s *%c = (%s*)0x%x;".format(tpe, variable, tpe, rng.nextInt(16))).nextLine()
       }
 
-      writer.write( """printf("%%d\n", %s);""".format(expr)).nextLine()
+      code.write( """printf("%%d\n", (int)(%s));""".format(expr)).nextLine()
     }
 
-    override def seed = _seed
-
-    override def includes = Seq("<stdint.h>")
+    protected override def includes = Seq("<stdint.h>")
 
     private val rng = new Random
   }

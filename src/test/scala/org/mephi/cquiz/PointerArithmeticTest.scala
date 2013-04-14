@@ -5,6 +5,8 @@ import org.junit.Test
 class PointerArithmeticTest {
   @Test
   def test() {
-    println("answer: " + Main.answer(PointerArithmetic.nextQuestion()))
+    val question = PointerArithmetic.nextQuestion()
+    question.writeCode(new DefaultWriter(Console.out))
+    println("answer: " + question.answer)
   }
 }

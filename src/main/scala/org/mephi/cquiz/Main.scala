@@ -1,10 +1,6 @@
 package org.mephi.cquiz
 
-import java.nio.file.Files
-import java.io.{PrintStream, File}
-import scala.sys.process._
-import io.Source
-import org.apache.commons.io.FileUtils
+import java.io.PrintStream
 
 object Main extends App {
   args.toList match {
@@ -23,11 +19,11 @@ object Main extends App {
               val task = variant(taskNumber - 1)
 
               q.println(taskNumber + ".")
-              val qw = new DefaultWriter(q)
-              task.question.write(qw)
-              qw.nextLine()
+              val code = new DefaultWriter(q)
+              task.question.writeCode(code)
+              code.nextLine()
               if (taskNumber != variant.length) {
-                qw.nextLine()
+                code.nextLine()
               }
 
               a.println(taskNumber + ". " + task.answer)
@@ -41,11 +37,8 @@ object Main extends App {
       } finally {
         q.close()
       }
+    case _ => sys.error("Unexpected arguments")
   }
-
-  case class Task(question: Question, answer: String)
-
-  def makeTask(question: Question) = answer(question).map(Task(question, _))
 
   def forever(code: => Any): Nothing = {
     while (true) {
@@ -54,20 +47,23 @@ object Main extends App {
     sys.error("It is not possible to get here")
   }
 
-  def makeTask(gen: () => Question): Task = {
+  case class Task(question: Question, answer: String)
+
+  def makeTask(generateQuestion: () => Question): Task = {
     forever {
-      makeTask(gen()) match {
-        case Some(task) => return task
+      val question = generateQuestion()
+      question.answer match {
+        case Some(x) => return Task(question, x)
         case None => {}
       }
     }
   }
 
-  def makeTask(topic: Topic): Task = PredefinedSeeds.seeds match {
+  def makeTask(topic: Topic): Task = PredefinedQuestions.questions match {
     case Some(s) => {
-      val tasks = s.getOrElse(topic.id, sys.error("No seeds for " + topic.id))
-      val (seed, answer) = tasks(Rng.nextInt(tasks.length))
-      Task(topic.question(seed), answer)
+      val topicQuestions = s.getOrElse(topic.id, sys.error("No questions for topic " + topic.id))
+      val question = topicQuestions(Rng.nextInt(topicQuestions.length))
+      Task(question, question._answer)
     }
     case None => makeTask(() => topic.nextQuestion())
   }
@@ -85,85 +81,5 @@ object Main extends App {
         makeTask(topic)
       }).toArray
     }).toArray
-  }
-
-  def program(question: Question, writer: Writer) {
-    writer.write("#include <stdio.h>").nextLine()
-    for (include <- question.includes) {
-      writer.write("#include ").write(include).nextLine()
-    }
-    writer.write("int main() ").block {
-      question.write(writer)
-      writer.write("return 0;").nextLine()
-    }.nextLine().nextLine()
-  }
-
-  implicit def richProcessBuilder(pb: ProcessBuilder) = new {
-    def !!!() {
-      val code = pb.!
-      if (code != 0) sys.error("Nonzero exit value: " + code)
-    }
-  }
-
-  def answer(question: Question): Option[String] = {
-    val dir = Files.createTempDirectory("c-quiz").toFile
-    try {
-      answer(question, dir)
-    } finally {
-      FileUtils.deleteDirectory(dir)
-    }
-  }
-
-  private def answer(question: Question, dir: File): Option[String] = {
-    val src = new File(dir, "c-quiz.c")
-    val srcStream = new PrintStream(src)
-    try {
-      program(question, new DefaultWriter(srcStream))
-    } finally {
-      srcStream.close()
-    }
-
-    val bin = new File(dir, "c-quiz")
-    Process(Seq("gcc", "-O0", "-g3", "-o", bin.toString, src.toString)).!!!
-
-    val pyScript = new File(dir, "c-quiz.py")
-    val out = new File(dir, "c-quiz.out")
-    val pyStream = new PrintStream(pyScript)
-    try {
-      pyStream.print(
-        """
-          |gdb.execute("set args > %s")
-          |gdb.execute("set backtrace past-main")
-          |
-          |mainBp = gdb.Breakpoint("main")
-          |mainDoneBp = None
-          |
-          |count = 0
-          |def onStop(event):
-          |  global count, mainDoneBp
-          |  if isinstance(event, gdb.BreakpointEvent):
-          |    if mainBp in event.breakpoints:
-          |      mainDoneBp = gdb.FinishBreakpoint()
-          |    if mainDoneBp != None and mainDoneBp in event.breakpoints:
-          |      if count < %d:
-          |        gdb.execute("quit 1")
-          |      gdb.execute("c")
-          |  count = count + 1
-          |  if count > %d:
-          |    gdb.execute("quit 1")
-          |  gdb.execute("next")
-          |gdb.events.stop.connect(onStop)
-          |
-          |gdb.execute("run")
-        """.stripMargin.format(out, question.minSteps, question.maxSteps))
-    } finally {
-      pyStream.close()
-    }
-
-    val code = Process(Seq("gdb", "--batch", "-x", pyScript.toString, bin.toString)).!
-    if (code == 0)
-      Some(Source.fromFile(out).getLines().next())
-    else
-      None
   }
 }

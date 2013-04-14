@@ -5,6 +5,8 @@ import org.junit.Test
 class PointersTest {
   @Test
   def test() {
-    println("answer: " + Main.answer(Pointers.nextQuestion()))
+    val question = Pointers.nextQuestion()
+    question.writeCode(new DefaultWriter(Console.out))
+    println("answer: " + Pointers.nextQuestion().answer)
   }
 }

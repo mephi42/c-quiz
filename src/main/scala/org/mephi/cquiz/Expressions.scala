@@ -11,16 +11,14 @@ object Expressions extends Topic {
 
   override val descriptionKey = "expressionsDescription"
 
-  override def question(_seed: Long) = new Question {
-    override def write(writer: Writer) {
-      val gen = new Gen(seed)
+  override def question(_seed: Long) = new SimpleCOutput {
+    protected override def write(code: Writer) {
+      val gen = new Gen(_seed)
       if (!gen.vars.isEmpty) {
-        writer.write("int ").write(gen.vars.mkString(", ")).write(";").nextLine()
+        code.write("int ").write(gen.vars.mkString(", ")).write(";").nextLine()
       }
-      writer.write( """printf("%i\n", """).write(gen.expr).write(");").nextLine()
+      code.write( """printf("%i\n", """).write(gen.expr).write(");").nextLine()
     }
-
-    override def seed = _seed
   }
 
   class Gen(seed: Long) {

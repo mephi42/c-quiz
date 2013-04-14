@@ -21,7 +21,7 @@ class DefaultWriter(val app: Appendable) extends Writer {
   }
 
   override def block(body: => Any) = {
-    write("{")
+    write(" {")
     indent += "  "
     nextLine()
     body

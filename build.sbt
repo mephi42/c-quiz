@@ -4,7 +4,7 @@ organization := "org.mephi.c-quiz"
 
 name := "c-quiz"
 
-version := "1.0"
+version := "1.1"
 
 resolvers += "oss-sonatype-repo" at "https://oss.sonatype.org/content/repositories/releases/"
 

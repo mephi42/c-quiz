@@ -36,9 +36,9 @@ class Select {
               val numberTransform = "span id=taskNumber" #> taskNumber.toString
               val task = variant(taskNumber - 1)
               val questionTransform = "pre id=code *" #> {
-                val writer = new StringWriter
-                task.question.write(new DefaultWriter(writer))
-                writer.toString
+                val code = new StringWriter
+                task.question.writeCode(new DefaultWriter(code))
+                code.toString
               }
               val answerTransform = "div id=maybeAnswer" #> (if (answers == "each") {
                 "tt id=answer *" #> task.answer

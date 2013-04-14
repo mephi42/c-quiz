@@ -10,31 +10,29 @@ object Loops extends Topic {
 
   override val descriptionKey = "loopsDescription"
 
-  override def question(_seed: Long) = new Question {
-    override def write(writer: Writer) {
-      rnd.setSeed(seed)
+  override def question(_seed: Long) = new SimpleCOutput {
+    protected override def write(code: Writer) {
+      rnd.setSeed(_seed)
 
-      writer.write("int i, j, x;").nextLine()
-      writer.write("x = ").write(rnd.nextInt(10)).write(";").nextLine()
+      code.write("int i, j, x;").nextLine()
+      code.write("x = ").write(rnd.nextInt(10)).write(";").nextLine()
       val nested = rnd.nextBoolean()
       if (nested) {
-        loop("i", writer) {
-          loop("j", writer) {
-            writer.write("x++;").nextLine()
+        loop("i", code) {
+          loop("j", code) {
+            code.write("x++;").nextLine()
           }
         }
       } else {
-        loop("i", writer) {
-          writer.write("x++;").nextLine()
+        loop("i", code) {
+          code.write("x++;").nextLine()
         }
-        loop("j", writer) {
-          writer.write("x++;").nextLine()
+        loop("j", code) {
+          code.write("x++;").nextLine()
         }
       }
-      writer.write("printf(\"%i\\n\", x);").nextLine()
+      code.write("printf(\"%i\\n\", x);").nextLine()
     }
-
-    override def seed = _seed
 
     override val minSteps = 10
 
@@ -68,7 +66,7 @@ object Loops extends Topic {
       override def opposite = NotEqual
     }
 
-    private def loop(counter: String, writer: Writer)(body: => Any) {
+    private def loop(counter: String, code: Writer)(body: => Any) {
       val start = rnd.nextInt(10)
       val end = rnd.nextInt(10)
       val delta = 1 + rnd.nextInt(3)
@@ -104,21 +102,21 @@ object Loops extends Topic {
 
       rnd.nextInt(3) match {
         case 0 => {
-          writer.write(initCounter).write(";").nextLine()
-          writer.write("while (").write(loopCondition).write(") ").block {
+          code.write(initCounter).write(";").nextLine()
+          code.write("while (").write(loopCondition).write(")").block {
             body
-            writer.write(nextCounter).write(";").nextLine()
+            code.write(nextCounter).write(";").nextLine()
           }.nextLine()
         }
         case 1 => {
-          writer.write(initCounter).write(";").nextLine()
-          writer.write("do ").block {
+          code.write(initCounter).write(";").nextLine()
+          code.write("do").block {
             body
-            writer.write(nextCounter).write(";").nextLine()
+            code.write(nextCounter).write(";").nextLine()
           }.write(" while (").write(loopCondition).write(");").nextLine()
         }
         case 2 => {
-          writer.write("for (").write(initCounter).write("; ").write(loopCondition).write("; ").write(nextCounter).write(") ").block {
+          code.write("for (").write(initCounter).write("; ").write(loopCondition).write("; ").write(nextCounter).write(")").block {
             body
           }.nextLine()
         }

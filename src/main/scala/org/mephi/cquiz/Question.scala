@@ -1,13 +1,14 @@
 package org.mephi.cquiz
 
 trait Question {
-  def write(writer: Writer)
+  /** Writes complete quiz program code. */
+  def writeCode(code: Writer)
 
-  def seed: Long
+  /** Returns answer.
+    * If question appears to be invalid, returns None. */
+  def answer: Option[String]
 
   def minSteps: Int = 0
 
   def maxSteps: Int = 100
-
-  def includes: Iterable[String] = None
 }

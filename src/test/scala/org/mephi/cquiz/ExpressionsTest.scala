@@ -5,6 +5,6 @@ import org.junit.Test
 class ExpressionsTest {
   @Test
   def test() {
-    println("answer: " + Main.answer(Expressions.nextQuestion()))
+    println("answer: " + Expressions.nextQuestion().answer)
   }
 }
