@@ -17,5 +17,6 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.10" % "test",
   "org.eclipse.jetty" % "jetty-server" % "8.1.7.v20120910" % "container",
   "org.eclipse.jetty" % "jetty-webapp" % "8.1.7.v20120910" % "container",
-  "org.slf4j" % "slf4j-simple" % "1.7.2" % "container"
+  "org.slf4j" % "slf4j-simple" % "1.7.2" % "container",
+  "org.odftoolkit" % "odfdom-java" % "0.8.7"
 )
